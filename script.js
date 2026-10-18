@@ -234,12 +234,16 @@ orderForm.addEventListener("submit", (e) => {
   );
 
   const WA_PHONE_NUMBER = "201000658127"; // YZ Studio Official WhatsApp
+  const waUrl = `https://api.whatsapp.com/send?phone=${WA_PHONE_NUMBER}&text=${orderMessage}`;
 
-  // Set WhatsApp confirmation link
+  // Set WhatsApp confirmation button
   const waBtn = document.getElementById("successWhatsAppBtn");
   if (waBtn) {
-    // Opens WhatsApp chat directly with YZ Studio with pre-typed order receipt
-    waBtn.href = `https://wa.me/${WA_PHONE_NUMBER}?text=${orderMessage}`;
+    waBtn.href = waUrl;
+    waBtn.onclick = function(e) {
+      e.preventDefault();
+      window.open(waUrl, "_blank");
+    };
   }
 
   // Update Instagram confirmation button
@@ -263,8 +267,10 @@ orderForm.addEventListener("submit", (e) => {
   successOverlay.classList.add("open");
   successOverlay.setAttribute("aria-hidden", "false");
 
-  // Automatically open WhatsApp direct chat with YZ Studio
-  window.open(`https://wa.me/${WA_PHONE_NUMBER}?text=${orderMessage}`, '_blank');
+  // Attempt automatic open as well
+  try {
+    window.open(waUrl, '_blank');
+  } catch(err){}
 
   // Clear cart
   for (let key in cart) delete cart[key];
