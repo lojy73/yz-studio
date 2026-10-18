@@ -1,5 +1,6 @@
 // Gem & Glow demo storefront. Update the product data and checkout link before launch.
 const products = {
+  zanni: { name: "ظني فيك يا ربي جميل", price: 850, detail: "Handcrafted Crystal Calligraphy Canvas" },
   bloom: { name: "Petal by Petal", price: 420, detail: "Floral diamond painting kit" },
   color: { name: "Color Me Happy", price: 510, detail: "Abstract diamond painting kit" },
   golden: { name: "Golden Hour", price: 465, detail: "Landscape diamond painting kit" },
