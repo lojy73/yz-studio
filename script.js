@@ -222,27 +222,36 @@ orderForm.addEventListener("submit", (e) => {
     paymentMethod: method
   };
 
-  // 1. Send Order Confirmation Email to Admin (luginetawfik@gmail.com) and Customer
+  // 1. Send Order Confirmation Email to Admin (luginetawfik@gmail.com) and Customer Invoice Copy
+  const emailPayload = {
+    _subject: `Order Confirmation #${orderId} - YZ Diamond Painting Studio`,
+    _template: "table",
+    _replyto: email,
+    "Order Date & Time": orderDateFormatted + " (Egypt Time)",
+    "Order ID": `#${orderId}`,
+    "Customer Name": name,
+    "Customer Email": email,
+    "Phone / WhatsApp": phone,
+    "Delivery Address": `${address}, ${city}`,
+    "Items Ordered": itemsText,
+    "Total Price": money(total),
+    "Payment Method": methodLabel,
+    "Store Notice": "Thank you for ordering with YZ Studio! For payment confirmation or inquiries, message us on Instagram @cyrstal.zy or WhatsApp +201000658127."
+  };
+
+  // If customer entered their email, send a copy directly to their Gmail as well
+  if (email && email.includes("@")) {
+    emailPayload._cc = email;
+    emailPayload._autoresponse = `Thank you ${name}! Your order #${orderId} with YZ Diamond Painting Studio has been received. Total: ${money(total)}. We will contact you shortly to confirm delivery!`;
+  }
+
   fetch("https://formsubmit.co/ajax/luginetawfik@gmail.com", {
     method: "POST",
     headers: { 
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    body: JSON.stringify({
-      _subject: `New YZ Studio Order #${orderId} from ${name}`,
-      _template: "table",
-      _replyto: email,
-      "Order Date & Time": orderDateFormatted + " (Egypt Time)",
-      "Order ID": `#${orderId}`,
-      "Customer Name": name,
-      "Customer Email": email,
-      "Phone / WhatsApp": phone,
-      "Delivery Address": `${address}, ${city}`,
-      "Items Ordered": itemsText,
-      "Total Price": money(total),
-      "Payment Method": methodLabel
-    })
+    body: JSON.stringify(emailPayload)
   }).catch(err => console.log("Email dispatch:", err));
 
   // 2. Save order to backend server (so orders appear on laptop, mobile, etc.)
