@@ -180,6 +180,7 @@ copyInstapayBtn.addEventListener("click", () => {
 orderForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const name = document.getElementById("custName").value.trim();
+  const email = document.getElementById("custEmail") ? document.getElementById("custEmail").value.trim() : "";
   const phone = document.getElementById("custPhone").value.trim();
   const city = document.getElementById("custCity").value.trim();
   const address = document.getElementById("custAddress").value.trim();
@@ -194,6 +195,7 @@ orderForm.addEventListener("submit", (e) => {
     orderId,
     date: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }),
     name,
+    email,
     phone,
     city,
     address,
@@ -202,7 +204,29 @@ orderForm.addEventListener("submit", (e) => {
     paymentMethod: method
   };
 
-  // 1. Save order locally
+  // 1. Send Order Confirmation Email to Admin (lugine@gmail.com) and Customer
+  fetch("https://formsubmit.co/ajax/lugine@gmail.com", {
+    method: "POST",
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      _subject: `New YZ Studio Order #${orderId} from ${name}`,
+      _template: "table",
+      _replyto: email,
+      "Order ID": `#${orderId}`,
+      "Customer Name": name,
+      "Customer Email": email,
+      "Phone / WhatsApp": phone,
+      "Delivery Address": `${address}, ${city}`,
+      "Items Ordered": itemsText,
+      "Total Price": money(total),
+      "Payment Method": methodLabel
+    })
+  }).catch(err => console.log("Email dispatch:", err));
+
+  // 2. Save order locally
   try {
     const existingOrders = JSON.parse(localStorage.getItem("yz_orders") || "[]");
     existingOrders.unshift(newOrder);
@@ -210,16 +234,6 @@ orderForm.addEventListener("submit", (e) => {
   } catch (err) {
     console.error("Failed to save order locally:", err);
   }
-
-  // 2. Sync order to Cloud Database so Laptop Dashboard can see it
-  const CLOUD_STORAGE_KEY = "yz_cloud_orders_store";
-  fetch(`https://api.jsonstorage.net/v1/json/00000000-0000-0000-0000-000000000000/${CLOUD_STORAGE_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newOrder)
-  }).catch(() => {
-    // Cloud sync fallback
-  });
 
   // Pre-formatted message for WhatsApp
   const orderMessage = encodeURIComponent(
