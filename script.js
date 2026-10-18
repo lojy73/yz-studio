@@ -191,9 +191,19 @@ orderForm.addEventListener("submit", (e) => {
   const itemsText = Object.entries(cart).map(([id, qty]) => `${products[id].name} (x${qty})`).join(", ");
   const orderId = "YZ-" + Math.floor(100000 + Math.random() * 900000);
 
+  const orderDateFormatted = new Date().toLocaleString("en-US", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true
+  });
+
   const newOrder = {
     orderId,
-    date: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }),
+    date: orderDateFormatted,
     name,
     email,
     phone,
@@ -215,6 +225,7 @@ orderForm.addEventListener("submit", (e) => {
       _subject: `New YZ Studio Order #${orderId} from ${name}`,
       _template: "table",
       _replyto: email,
+      "Order Date & Time": orderDateFormatted + " (Egypt Time)",
       "Order ID": `#${orderId}`,
       "Customer Name": name,
       "Customer Email": email,
