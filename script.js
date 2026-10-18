@@ -100,14 +100,22 @@ document.getElementById("newsletterForm").addEventListener("submit", event => {
   const email = document.getElementById("emailInput").value.trim();
   if (!email) return;
 
-  // Save subscriber to localStorage list
+  // Save subscriber to backend and localStorage backup
+  const newSub = {
+    email: email,
+    subscribedAt: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
+  };
+
+  fetch('/api/subscribers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newSub)
+  }).catch(err => console.log("Sub API dispatch:", err));
+
   try {
     const subscribers = JSON.parse(localStorage.getItem("yz_newsletter_subscribers") || "[]");
     if (!subscribers.some(sub => sub.email === email)) {
-      subscribers.unshift({
-        email: email,
-        subscribedAt: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
-      });
+      subscribers.unshift(newSub);
       localStorage.setItem("yz_newsletter_subscribers", JSON.stringify(subscribers));
     }
   } catch (err) {
@@ -237,7 +245,14 @@ orderForm.addEventListener("submit", (e) => {
     })
   }).catch(err => console.log("Email dispatch:", err));
 
-  // 2. Save order locally
+  // 2. Save order to backend server (so orders appear on laptop, mobile, etc.)
+  fetch("/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newOrder)
+  }).catch(err => console.log("Order API dispatch:", err));
+
+  // 3. Also save order locally in browser as offline backup
   try {
     const existingOrders = JSON.parse(localStorage.getItem("yz_orders") || "[]");
     existingOrders.unshift(newOrder);
