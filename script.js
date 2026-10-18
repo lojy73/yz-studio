@@ -202,7 +202,7 @@ orderForm.addEventListener("submit", (e) => {
     paymentMethod: method
   };
 
-  // 1. Save order into localStorage for the Admin Dashboard (admin.html)
+  // 1. Save order locally
   try {
     const existingOrders = JSON.parse(localStorage.getItem("yz_orders") || "[]");
     existingOrders.unshift(newOrder);
@@ -211,9 +211,19 @@ orderForm.addEventListener("submit", (e) => {
     console.error("Failed to save order locally:", err);
   }
 
-  // Pre-formatted message for Instagram / WhatsApp
+  // 2. Sync order to Cloud Database so Laptop Dashboard can see it
+  const CLOUD_STORAGE_KEY = "yz_cloud_orders_store";
+  fetch(`https://api.jsonstorage.net/v1/json/00000000-0000-0000-0000-000000000000/${CLOUD_STORAGE_KEY}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newOrder)
+  }).catch(() => {
+    // Cloud sync fallback
+  });
+
+  // Pre-formatted message for WhatsApp
   const orderMessage = encodeURIComponent(
-    `Hello YZ Studio! I just placed an order 🛍️\n\n` +
+    `Hello YZ Studio! I just placed an order on the website 🛍️\n\n` +
     `• Order ID: #${orderId}\n` +
     `• Name: ${name}\n` +
     `• Phone: ${phone}\n` +
@@ -223,11 +233,17 @@ orderForm.addEventListener("submit", (e) => {
     `• Payment: ${methodLabel}`
   );
 
+  // Set WhatsApp confirmation link
+  const waBtn = document.getElementById("successWhatsAppBtn");
+  if (waBtn) {
+    // Opens WhatsApp with the customer's order receipt pre-typed
+    waBtn.href = `https://wa.me/?text=${orderMessage}`;
+  }
+
   // Update Instagram confirmation button
   const instaBtn = document.getElementById("successInstaBtn");
   if (instaBtn) {
     instaBtn.href = "https://www.instagram.com/cyrstal.zy?obrf=MWVlNjk5ZWZmbjJ0YQ==";
-    instaBtn.title = "Send details to @cyrstal.zy on Instagram";
   }
 
   // Show confirmation modal
@@ -244,6 +260,9 @@ orderForm.addEventListener("submit", (e) => {
   closeCheckout();
   successOverlay.classList.add("open");
   successOverlay.setAttribute("aria-hidden", "false");
+
+  // Automatically open WhatsApp for instant order receipt
+  window.open(`https://wa.me/?text=${orderMessage}`, '_blank');
 
   // Clear cart
   for (let key in cart) delete cart[key];
