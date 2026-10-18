@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YZ Studio - Admin Orders Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #302728;
+      --muted: #817577;
+      --cream: #fffaf7;
+      --plum: #633f51;
+      --rose: #d98e91;
+      --line: #eadfda;
+      --white: #fff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #fbf5f2;
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+    }
+    
+    /* Login Screen Modal */
+    .login-container {
+      position: fixed;
+      inset: 0;
+      background: rgba(48, 39, 40, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--cream);
+      padding: 35px 30px;
+      border-radius: 12px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      border: 1px solid var(--line);
+    }
+    .login-icon {
+      width: 50px;
+      height: 50px;
+      background: #f7ded6;
+      color: var(--plum);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      margin: 0 auto 16px;
+    }
+    .login-card h2 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      color: var(--plum);
+    }
+    .login-card p {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0 0 22px;
+    }
+    .login-input {
+      width: 100%;
+      padding: 13px 15px;
+      border: 1px solid #d9c4bd;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      outline: none;
+      background: white;
+    }
+    .login-input:focus {
+      border-color: var(--plum);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--plum);
+      color: white;
+      border: 0;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .login-btn:hover {
+      background: #4d3040;
+    }
+    .login-error {
+      color: #d9534f;
+      font-size: 11px;
+      margin-top: 10px;
+      display: none;
+    }
+    .back-home-link {
+      display: inline-block;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      text-decoration: none;
+    }
+    .back-home-link:hover {
+      color: var(--plum);
+    }
+
+    /* Dashboard Layout */
+    .dashboard-content {
+      display: none;
+      padding: 30px 5%;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    h1 { margin: 0; font-size: 26px; color: var(--plum); }
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--plum);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-dark { background: var(--plum); color: white; }
+    .btn-outline { background: white; color: var(--plum); }
+    .btn-danger { background: #d9534f; color: white; border-color: #d9534f; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .stat-card {
+      background: white;
+      padding: 18px 20px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+    .stat-card span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .stat-card strong { display: block; font-size: 24px; margin-top: 5px; color: var(--plum); }
+    .table-container {
+      background: white;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      overflow-x: auto;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th {
+      background: #faf0ec;
+      padding: 14px 16px;
+      font-weight: 600;
+      color: var(--plum);
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+    td { padding: 14px 16px; border-bottom: 1px solid #f2e9e6; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .tag-instapay { background: #e0f2fe; color: #0369a1; }
+    .tag-cod { background: #fef3c7; color: #92400e; }
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Secure Password Modal -->
+  <div class="login-container" id="loginModal">
+    <div class="login-card">
+      <div class="login-icon">🔒</div>
+      <h2>Admin Protected Area</h2>
+      <p>Please enter the admin password to access customer orders.</p>
+      
+      <form id="loginForm">
+        <input type="password" id="adminPassInput" class="login-input" placeholder="Enter password..." required autofocus>
+        <button type="submit" class="login-btn">Unlock Dashboard ✦</button>
+        <div id="loginError" class="login-error">Incorrect password. Please try again.</div>
+      </form>
+      <a href="index.html" class="back-home-link">← Return to Store</a>
+    </div>
+  </div>
+
+  <!-- Dashboard Main View -->
+  <div class="dashboard-content" id="dashboardContent">
+    <div class="header">
+      <div>
+        <h1>YZ Orders Dashboard</h1>
+        <p style="margin: 5px 0 0; color: var(--muted); font-size: 13px;">Live orders placed by customers on your store.</p>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-outline">← Back to Shop</a>
+        <button id="changePassBtn" class="btn btn-outline">🔑 Change Password</button>
+        <button id="exportBtn" class="btn btn-outline">📥 Export to CSV (Excel)</button>
+        <button id="clearBtn" class="btn btn-danger">Clear All Orders</button>
+        <button id="logoutBtn" class="btn btn-outline" style="border-color:#817577; color:#817577;">Logout ↪</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <span>Total Orders</span>
+        <strong id="statTotalOrders">0</strong>
+      </div>
+      <div class="stat-card">
+        <span>Total Sales</span>
+        <strong id="statTotalSales">EGP 0</strong>
+      </div>
+      <div class="stat-card">
+        <span>VIP Email Subscribers</span>
+        <strong id="statTotalSubs">0</strong>
+      </div>
+    </div>
+
+    <div class="table-container" style="margin-bottom: 30px;">
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Date & Time</th>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>City & Address</th>
+            <th>Items Ordered</th>
+            <th>Total</th>
+            <th>Payment</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody">
+        </tbody>
+      </table>
+      <div id="emptyState" class="empty-state" style="display: none;">
+        <p style="font-size: 16px; margin-bottom: 6px;">No orders yet ✧</p>
+        <small>When customers place orders, they will appear right here in real time.</small>
+      </div>
+    </div>
+
+    <!-- Newsletter Subscribers Section -->
+    <div class="header" style="margin-top: 15px;">
+      <div>
+        <h2 style="margin: 0; font-size: 20px; color: var(--plum);">VIP Email Subscribers List</h2>
+        <p style="margin: 5px 0 0; color: var(--muted); font-size: 12px;">Customers who subscribed with their real email address.</p>
+      </div>
+      <div>
+        <button id="exportSubsBtn" class="btn btn-outline">📥 Export Emails (CSV)</button>
+      </div>
+    </div>
+    <div class="table-container">
+      <table id="subsTable">
+        <thead>
+          <tr>
+            <th>Subscribed Date</th>
+            <th>Customer Email Address</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="subsBody"></tbody>
+      </table>
+      <div id="emptySubsState" class="empty-state" style="display: none;">
+        <p style="font-size: 15px; margin-bottom: 4px;">No email subscribers yet ✉️</p>
+        <small>When visitors submit their email in the footer newsletter box, they will appear here.</small>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Default password is "yz2026", can be changed anytime
+    function getStoredPassword() {
+      return localStorage.getItem("yz_admin_pass") || "yz2026";
+    }
+
+    const loginModal = document.getElementById("loginModal");
+    const dashboardContent = document.getElementById("dashboardContent");
+    const loginForm = document.getElementById("loginForm");
+    const adminPassInput = document.getElementById("adminPassInput");
+    const loginError = document.getElementById("loginError");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const changePassBtn = document.getElementById("changePassBtn");
+
+    // Check if session is already active
+    if (sessionStorage.getItem("yz_admin_authenticated") === "true") {
+      showDashboard();
+    }
+
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const enteredPass = adminPassInput.value.trim();
+      const correctPass = getStoredPassword();
+
+      if (enteredPass === correctPass) {
+        sessionStorage.setItem("yz_admin_authenticated", "true");
+        loginError.style.display = "none";
+        showDashboard();
+      } else {
+        loginError.style.display = "block";
+        adminPassInput.value = "";
+        adminPassInput.focus();
+      }
+    });
+
+    function showDashboard() {
+      loginModal.style.display = "none";
+      dashboardContent.style.display = "block";
+      loadOrders();
+      loadSubscribers();
+    }
+
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.removeItem("yz_admin_authenticated");
+      location.reload();
+    });
+
+    changePassBtn.addEventListener("click", () => {
+      const current = prompt("Enter current password:");
+      if (current !== getStoredPassword()) {
+        alert("Incorrect current password!");
+        return;
+      }
+      const newPass = prompt("Enter new password (min 4 characters):");
+      if (newPass && newPass.trim().length >= 4) {
+        localStorage.setItem("yz_admin_pass", newPass.trim());
+        alert("Password updated successfully!");
+      } else if (newPass !== null) {
+        alert("Password must be at least 4 characters long.");
+      }
+    });
+
+    function loadOrders() {
+      const orders = JSON.parse(localStorage.getItem("yz_orders") || "[]");
+      const tbody = document.getElementById("ordersBody");
+      const emptyState = document.getElementById("emptyState");
+      const statTotalOrders = document.getElementById("statTotalOrders");
+      const statTotalSales = document.getElementById("statTotalSales");
+
+      statTotalOrders.textContent = orders.length;
+      const totalRevenue = orders.reduce((sum, ord) => sum + (ord.total || 0), 0);
+      statTotalSales.textContent = `EGP ${totalRevenue.toLocaleString()}`;
+
+      if (orders.length === 0) {
+        tbody.innerHTML = "";
+        emptyState.style.display = "block";
+        return;
+      }
+
+      emptyState.style.display = "none";
+      tbody.innerHTML = orders.map(ord => {
+        const isInstapay = ord.paymentMethod === "instapay";
+        return `
+          <tr>
+            <td style="white-space:nowrap; color:#776c6e;">${ord.date || "Just now"}</td>
+            <td><strong>#${ord.orderId}</strong></td>
+            <td><strong>${ord.name}</strong></td>
+            <td><a href="https://wa.me/${ord.phone.replace(/[^0-9]/g, '')}" target="_blank" style="color: #633f51; text-decoration: underline;">${ord.phone}</a></td>
+            <td>${ord.address}, <strong>${ord.city}</strong></td>
+            <td>${ord.itemsText}</td>
+            <td><strong>EGP ${ord.total.toLocaleString()}</strong></td>
+            <td><span class="tag ${isInstapay ? 'tag-instapay' : 'tag-cod'}">${isInstapay ? '⚡ InstaPay' : '💵 Cash on Delivery'}</span></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      if (confirm("Are you sure you want to clear all recorded orders?")) {
+        localStorage.removeItem("yz_orders");
+        loadOrders();
+      }
+    });
+
+    function loadSubscribers() {
+      const subs = JSON.parse(localStorage.getItem("yz_newsletter_subscribers") || "[]");
+      const tbody = document.getElementById("subsBody");
+      const emptySubsState = document.getElementById("emptySubsState");
+      const statTotalSubs = document.getElementById("statTotalSubs");
+
+      statTotalSubs.textContent = subs.length;
+
+      if (subs.length === 0) {
+        tbody.innerHTML = "";
+        emptySubsState.style.display = "block";
+        return;
+      }
+
+      emptySubsState.style.display = "none";
+      tbody.innerHTML = subs.map((s, idx) => `
+        <tr>
+          <td style="color:#776c6e; white-space:nowrap;">${s.subscribedAt || "Recently"}</td>
+          <td><strong style="color:var(--plum);">${s.email}</strong></td>
+          <td><a href="mailto:${s.email}" style="color:var(--rose); text-decoration:underline; font-weight:600;">Send Email ↗</a></td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const orders = JSON.parse(localStorage.getItem("yz_orders") || "[]");
+      if (!orders.length) {
+        alert("No orders to export yet!");
+        return;
+      }
+      let csv = "Order ID,Date,Customer Name,Phone,City,Address,Items,Total,Payment Method\n";
+      orders.forEach(o => {
+        csv += `"${o.orderId}","${o.date}","${o.name}","${o.phone}","${o.city}","${o.address.replace(/"/g, '""')}","${o.itemsText}","EGP ${o.total}","${o.paymentMethod}"\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `YZ_Orders_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    });
+
+    document.getElementById("exportSubsBtn").addEventListener("click", () => {
+      const subs = JSON.parse(localStorage.getItem("yz_newsletter_subscribers") || "[]");
+      if (!subs.length) {
+        alert("No subscribers to export yet!");
+        return;
+      }
+      let csv = "Subscribed Date,Email Address\n";
+      subs.forEach(s => {
+        csv += `"${s.subscribedAt}","${s.email}"\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `YZ_Subscribers_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    });
+  </script>
+</body>
+</html>
