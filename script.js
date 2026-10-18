@@ -242,7 +242,7 @@ orderForm.addEventListener("submit", (e) => {
     waBtn.href = waUrl;
     waBtn.onclick = function(e) {
       e.preventDefault();
-      window.open(waUrl, "_blank");
+      window.location.href = waUrl;
     };
   }
 
@@ -267,10 +267,10 @@ orderForm.addEventListener("submit", (e) => {
   successOverlay.classList.add("open");
   successOverlay.setAttribute("aria-hidden", "false");
 
-  // Attempt automatic open as well
-  try {
-    window.open(waUrl, '_blank');
-  } catch(err){}
+  // On mobile & desktop, open WhatsApp app directly
+  setTimeout(() => {
+    window.location.href = waUrl;
+  }, 400);
 
   // Clear cart
   for (let key in cart) delete cart[key];
