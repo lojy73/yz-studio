@@ -204,8 +204,8 @@ orderForm.addEventListener("submit", (e) => {
     paymentMethod: method
   };
 
-  // 1. Send Order Confirmation Email to Admin (lugine@gmail.com) and Customer
-  fetch("https://formsubmit.co/ajax/lugine@gmail.com", {
+  // 1. Send Order Confirmation Email to Admin (luginetawfik@gmail.com) and Customer
+  fetch("https://formsubmit.co/ajax/luginetawfik@gmail.com", {
     method: "POST",
     headers: { 
       'Content-Type': 'application/json',
